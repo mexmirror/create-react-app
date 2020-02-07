@@ -46,6 +46,9 @@ const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 // makes for a smoother build process.
 const shouldInlineRuntimeChunk = process.env.INLINE_RUNTIME_CHUNK !== 'false';
 
+const shouldUseServiceWorker =
+  process.env.USE_SERVICE_WORKER !== 'false' || false;
+
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10000'
 );
@@ -64,6 +67,8 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 module.exports = function(webpackEnv) {
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
+
+  const useServiceWorker = isEnvProduction || shouldUseServiceWorker;
 
   // Variable used for enabling profiling in Production
   // passed into alias object. Uses a flag if passed into the build command
@@ -670,7 +675,7 @@ module.exports = function(webpackEnv) {
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       // Generate a service worker script that will precache, and keep up to date,
       // the HTML & assets that are part of the Webpack build.
-      isEnvProduction &&
+      useServiceWorker &&
         new WorkboxWebpackPlugin.GenerateSW({
           clientsClaim: true,
           exclude: [/\.map$/, /asset-manifest\.json$/],

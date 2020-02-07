@@ -22,6 +22,9 @@ const sockHost = process.env.WDS_SOCKET_HOST;
 const sockPath = process.env.WDS_SOCKET_PATH; // default: '/sockjs-node'
 const sockPort = process.env.WDS_SOCKET_PORT;
 
+const shouldUseServiceWorker =
+  process.env.USE_SERVICE_WORKER !== 'false' || false;
+
 module.exports = function(proxy, allowedHost) {
   return {
     // WebpackDevServer 2.4.3 introduced a security fix that prevents remote
@@ -130,7 +133,9 @@ module.exports = function(proxy, allowedHost) {
       // We do this in development to avoid hitting the production cache if
       // it used the same host and port.
       // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
-      app.use(noopServiceWorkerMiddleware(paths.publicUrlOrPath));
+      if (!shouldUseServiceWorker) {
+        app.use(noopServiceWorkerMiddleware(paths.publicUrlOrPath));
+      }
     },
   };
 };
